@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --job-name=fastqc                                # Job name
+#SBATCH --mail-type=FAIL                                 # Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=tengyao.song@cuanschutz.edu          # Where to send mail
+#SBATCH --nodes=1                                        # Numbers of nodes
+#SBATCH --ntasks=1                                       # Number of CPU (tasks)
+#SBATCH --time=00:25:00                                  # Time limit hrs:min:sec
+#SBATCH --partition=shas                              # Job queue
+#SBATCH --mem=4gb                                        # Memory limit
+#SBATCH --output=/projects/tys@xsede.org/RNAseq/vehdexil1bil13/eofiles/fastqc_%j.out
+#SBATCH --error=/projects/tys@xsede.org/RNAseq/vehdexil1bil13/eofiles/fastqc_%j.err
+
+################ SET REQUIRED VARIABLES ##################################################
+
+INDIR=/projects/tys@xsede.org/RNAseq/vehdexil1bil13/
+OUTDIR=/projects/tys@xsede.org/RNAseq/vehdexil1bil13/fastqc
+
+##########################################################################################
+############### RUN FASTQC ####################################################
+source /curc/sw/anaconda3/2019.03/bin/activate
+conda activate /projects/tys@xsede.org/conda/env/biotools
+
+fastqc -t 1 -o /projects/tys@xsede.org/RNAseq/vehdexil1bil13/fastqc/ /projects/tys@xsede.org/RNAseq/vehdexil1bil13/Dexamethasone_1_S8_L005_R1_001.fastq.gz
