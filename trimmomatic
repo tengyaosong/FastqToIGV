@@ -1,0 +1,58 @@
+#!/bin/bash
+#SBATCH --job-name=trimmomatic                           # Job name
+#SBATCH --mail-type=FAIL                                 # Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=tengyao.song@cuanschutz.edu          # Where to send mail
+#SBATCH --nodes=1                                        # Numbers of nodes
+#SBATCH --ntasks=16                                       # Number of CPU (tasks)
+#SBATCH --time=03:30:00                                  # Time limit hrs:min:sec
+#SBATCH --partition=shas                              # Job queue
+#SBATCH --mem=64gb                                        # Memory limiti
+#SBATCH --output=/scratch/summit/tys@xsede.org/HaolinLiu/trimming/eofiles/trimming_%j.out
+#SBATCH --error=/scratch/summit/tys@xsede.org/HaolinLiu/trimming/eofiles/trimming_%j.err
+
+################ SET REQUIRED VARIABLES ##################################################
+INDIR=/scratch/summit/tys@xsede.org/HaolinLiu/fastq
+OUTDIR=/scratch/summit/tys@xsede.org/HaolinLiu/trimming
+ADAPTERS=/projects/tys@xsede.org/conda/env/biotools/share/trimmomatic-0.39-1/adapters
+
+################ RUN TRIMMOMATIC #########################################################
+source /curc/sw/anaconda3/2019.03/bin/activate
+conda activate /projects/tys@xsede.org/conda/env/biotools/
+
+java -Xmx64g -jar /projects/tys@xsede.org/conda/env/biotools/share/trimmomatic-0.39-1/trimmomatic.jar \
+ PE -threads 16 \
+ -phred33 \
+ -trimlog ${OUTDIR}/trimlog/lib1.trimlog.log \
+ ${INDIR}/Lib1_M3_S31_L002_R1_001.fastq.gz \
+ ${INDIR}/Lib1_M3_S31_L002_R2_001.fastq.gz \
+ ${OUTDIR}/Lib1_M3_S31_L002_R1_001.paired.trimmed.fastq \
+ ${OUTDIR}/Lib1_M3_S31_L002_R1_001.unpaired.trimmed.fastq \
+ ${OUTDIR}/Lib1_M3_S31_L002_R2_001.paired.trimmed.fastq \
+ ${OUTDIR}/Lib1_M3_S31_L002_R2_001.unpaired.trimmed.fastq \
+ ILLUMINACLIP:${ADAPTERS}/TruSeq3-PE.fa:2:30:10 \
+ LEADING:3 \
+ TRAILING:3 \
+ SLIDINGWINDOW:4:15 \
+ MINLEN:36
+
+java -Xmx64g -jar /projects/tys@xsede.org/conda/env/biotools/share/trimmomatic-0.39-1/trimmomatic.jar \
+ PE -threads 16 \
+ -phred33 \
+ -trimlog ${OUTDIR}/trimlog/lib2.trimlog.log \
+ ${INDIR}/Lib2_53_S32_L002_R1_001.fastq.gz \
+ ${INDIR}/Lib2_53_S32_L002_R2_001.fastq.gz \
+ ${OUTDIR}/Lib2_53_S32_L002_R1_001.paired.trimmed.fastq \
+ ${OUTDIR}/Lib2_53_S32_L002_R1_001.unpaired.trimmed.fastq \
+ ${OUTDIR}/Lib2_53_S32_L002_R2_001.paired.trimmed.fastq \
+ ${OUTDIR}/Lib2_53_S32_L002_R2_001.unpaired.trimmed.fastq \
+ ILLUMINACLIP:${ADAPTERS}/TruSeq3-PE.fa:2:30:10 \
+ LEADING:3 \
+ TRAILING:3 \
+ SLIDINGWINDOW:4:15 \
+ MINLEN:36
+
+################# RUN fastqc###############################################################
+fastqc -t 16 -o ${OUTDIR}/refastqc/ /${OUTDIR}/Lib1_M3_S31_L002_R1_001.paired.trimmed.fastq
+fastqc -t 16 -o ${OUTDIR}/refastqc/ /${OUTDIR}/Lib1_M3_S31_L002_R2_001.paired.trimmed.fastq
+fastqc -t 16 -o ${OUTDIR}/refastqc/ /${OUTDIR}/Lib2_53_S32_L002_R1_001.paired.trimmed.fastq
+fastqc -t 16 -o ${OUTDIR}/refastqc/ /${OUTDIR}/Lib2_53_S32_L002_R2_001.paired.trimmed.fastq
